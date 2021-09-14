@@ -1,0 +1,1 @@
+java -cp E:\IdeaProjects\sotw\halloween-sensor\target\halloween-sensor-jar-with-dependencies.jar org.festerson.halloween.HalloweenAlert
