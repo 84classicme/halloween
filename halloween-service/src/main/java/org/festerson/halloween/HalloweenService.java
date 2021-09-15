@@ -6,6 +6,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.Acknowledgment;
 
 @SpringBootApplication
 public class HalloweenService { // implements ApplicationRunner {
@@ -22,9 +23,9 @@ public class HalloweenService { // implements ApplicationRunner {
     @Value("${reset.topic.name}")
     private  String resetTopic;
 
-    public void sendMessage(String msg){
+    public void notifyLightsAndSound(String msg){
 
-        //kafkaTemplate.send(lightsTopic, msg);
+        kafkaTemplate.send(lightsTopic, msg);
         kafkaTemplate.send(soundTopic, msg);
     }
 
@@ -33,9 +34,10 @@ public class HalloweenService { // implements ApplicationRunner {
 	}
 
     @KafkaListener(topics = "${guest.topic.name}", groupId = "${kafka.consumer-group}")
-    public void listenForGuests(String message) {
+    public void listenForGuests(String message, Acknowledgment ack) {
         System.out.println("HalloweenService Received Message in group - halloween: " + message);
-        sendMessage("Showtime!");
+        notifyLightsAndSound("Showtime!");
+        ack.acknowledge();
     }
 
 }

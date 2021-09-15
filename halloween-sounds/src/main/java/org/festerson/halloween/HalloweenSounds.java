@@ -19,26 +19,32 @@ public class HalloweenSounds {
     @Autowired
     ResourceLoader resourceLoader;
 
+    private static String OS = System.getProperty("os.name").toLowerCase();
+
     public static void main(String[] args) {
         SpringApplication.run(HalloweenSounds.class, args);
     }
 
     @KafkaListener(topics = "${sound.topic.name}", groupId = "${kafka.consumer-group}")
     public void listen(String message, Acknowledgment ack) throws InterruptedException {
-        System.out.println("HalloweenSounds Received Message in group - halloween: " + message);
+        System.out.println("HalloweenSounds received message: " + message);
         manageSound();
         ack.acknowledge();
     }
 
     private void manageSound()  {
-        System.out.println("Playing sound...");
+        System.out.println("Playing sound on OS " + OS + "...");
         try {
-
-            Resource resource = resourceLoader.getResource("classpath:/halloween.wav");
-            AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(resource.getInputStream());
-            Clip clip = AudioSystem.getClip();
-            clip.open(audioInputStream);
-            clip.start();
+            if ( OS.indexOf("win") >= 0 ) {
+                Resource resource = resourceLoader.getResource("classpath:/halloween.wav");
+                AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(resource.getInputStream());
+                Clip clip = AudioSystem.getClip();
+                clip.open(audioInputStream);
+                clip.start();
+            } else {
+                Process p=Runtime.getRuntime().exec("paplay -p --device=2 /home/pi/halloween/halloween.wav");
+                p.waitFor();
+            }
         } catch (Exception ex) {
             System.err.println("ERROR: " + ex.getMessage());
             ex.printStackTrace(System.err);
